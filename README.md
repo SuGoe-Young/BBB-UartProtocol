@@ -1,41 +1,49 @@
 # BBB-UartProtocol
 
-# usag
 
-1. To use this project, copy all files into your Buildroot project's package directory (for example: package/uart_interface). 
-```
-cp /(path to BBB-UartProtocol) / (path to your buildroot project)/package/uart_interface 
-```
-2. select your configuration 
-```
-make beaglebone_defconfig  #(optional)
-```
-3. enable uart_interface package
-```
-make menuconfig
-```
-```
--> Package  --->
-    -> uart_interface  --->
-        -> [*] uart_interface
-``` 
-4. then, build your Buildroot project
-```
-make
+That drops a `uart_interface` binary in the repo. Copy it onto the board  and run it.
+
+## Using it with Buildroot
+1. Throw the sources into your package folder, e.g.
+   ```bash
+   cp -r /path/to/BBB-UartProtocol/* /path/to/buildroot/package/uart_interface/
+   ```
+2. Need the stock BBB config? Run this once (skip if you already did):
+   ```bash
+   make beaglebone_defconfig
+   ```
+3. Turn the package on:
+   ```
+   make menuconfig
+   -> Package --->
+       -> uart_interface --->
+           -> [*] uart_interface
+   ```
+4. Build like usual:
+   ```bash
+   make
+   ```
+
+## Tweaks I usually make
+1. Pick the UART in `main.c`:
+   ```c
+   fd = open("/dev/ttyS4", O_RDWR | O_NOCTTY | O_NDELAY);
+   ```
+2. Add your own commands in `uart_protocol.c`:
+   ```c
+   static const CommandInfo command_table[] = {
+       { "FOV", "SET", -1, TYPE_FLOAT, fov_set_handler },
+       { "FOV", "GET", -1, TYPE_UNDEFINED, fov_get_handler },
+       { "FOO", "BAR", 8, TYPE_CHAR, foo_bar_handler },
+   };
+   ```
+   Setting `data_len` to `-1` means “whatever length comes in”; any other number locks it down.
+
+## Sample frames
+Format is `<prefix>:<function>:<action>:<len>:<data>@`
+```text
+VSEC:FOV:SET:9:45.2,33.6@
+VSEC:FOV:GET:0:@
 ```
 
-# custom 
-1. chose your desired UART port in main.c
-```
- fd = open("your/uart port path"), O_RDWR | O_NOCTTY | O_NDELAY);  
-```
-2. add your desired command handler in uart_protocol.c
-```
-static CommandInfo cmd_table[] = {
-    {"FOV", "SET", 0, TYPE_FLOAT, NULL, fov_set_handler},
-    {"FOV", "GET", 0, TYPE_UNDEFINED, NULL, fov_get_handler},
-    .
-    .
-    .
-};
-```
+When a frame hits, the parser calls the matching handler, and whatever the handler writes gets pushed out through the callback I registered with `uart_response_init()`.
