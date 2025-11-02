@@ -1,9 +1,8 @@
-CROSS_COMPILE ?= aarch64-ca53-linux-gnu-
 CC := $(CROSS_COMPILE)gcc
 STRIP := $(CROSS_COMPILE)strip
 
 TARGET := uart_interface
-SRCS := uart_interface.c
+SRCS := main.c uart_protocol.c
 OBJS := $(SRCS:.c=.o)
 
 INC := -Iinclude

@@ -1,0 +1,4 @@
+config BR2_PACKAGE_UART_INTERFACE
+    bool "uart-interface"
+    help
+        uart protocol tool

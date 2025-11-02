@@ -10,7 +10,8 @@ int fd;
 
 void uart_response_callback(const char *msg)
 {
-    write(fd, msg, strlen(msg));
+    ssize_t written = write(fd, msg, strlen(msg));
+    (void)written;
 }
 
 int main()
@@ -35,7 +36,7 @@ int main()
     tty.c_cc[VTIME] = 1;
     tcsetattr(fd, TCSANOW, &tty);
 
-    // === 這裡是重點 ===
+
     register_all_commands();
 
     printf("UART ready, listening...\n");

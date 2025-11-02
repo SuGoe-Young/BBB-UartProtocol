@@ -1,5 +1,10 @@
 #include "uart_protocol.h"
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
 
+static void fov_set_handler(const char *data);
+static void fov_get_handler(const char *data);
 
 // hash
 static HashNode *hash_table[HASH_TABLE_SIZE];
@@ -31,14 +36,14 @@ void uart_response_init(void resp_function(const char *msg))
 
 
 // set command
-static CommandInfo cmd_table[] = {
+static const CommandInfo cmd_table[] = {
     {"FOV", "SET", 0, TYPE_FLOAT, NULL, fov_set_handler},
     {"FOV", "GET", 0, TYPE_UNDEFINED, NULL, fov_get_handler},
 };
-static const int CMD_COUNT = sizeof(cmd_table) / sizeof(cmd_table[0]);
+static const size_t command_count = sizeof(cmd_table) / sizeof(cmd_table[0]);
 
 
-void register_command(CommandInfo *cmd)
+void register_command(const CommandInfo *cmd)
 {
     char resp[UART_RESPONSE_BUF_SIZE];
 
@@ -48,8 +53,9 @@ void register_command(CommandInfo *cmd)
     HashNode *node = malloc(sizeof(HashNode));
     if (!node)
     {
-        snprintf(resp, "[register_command] new node fail!\n");
+        snprintf(resp, sizeof(resp), "[register_command] new node fail!\n");
         if (uart_responder) uart_responder(resp);
+        return;
     }
 
     node->cmd = *cmd;
@@ -57,6 +63,14 @@ void register_command(CommandInfo *cmd)
     hash_table[idx] = node;
 }
 // ---------------------------------------------------------
+
+void register_all_commands(void)
+{
+    for (size_t i = 0; i < command_count; ++i)
+    {
+        register_command(&cmd_table[i]);
+    }
+}
 
 void parse_command(const char *cmd)
 {
@@ -132,4 +146,3 @@ static void fov_get_handler(const char *data)
     snprintf(resp, sizeof(resp), "FOV get ok:H=wow,V=yeah");
     if (uart_responder) uart_responder(resp);
 }
-

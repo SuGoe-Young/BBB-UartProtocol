@@ -1,0 +1,15 @@
+UART_INTERFACE_VERSION = 1.0
+UART_INTERFACE_SITE = $(TOPDIR)/package/uart_interface
+UART_INTERFACE_SITE_METHOD = local
+UART_INTERFACE_MAKE_OPTS = CROSS_COMPILE=$(TARGET_CROSS) STRIP=$(TARGET_STRIP)
+
+define UART_INTERFACE_BUILD_CMDS
+	$(MAKE) -C $(@D) $(UART_INTERFACE_MAKE_OPTS)
+endef
+
+define UART_INTERFACE_INSTALL_TARGET_CMDS
+	$(INSTALL) -D -m 0755 $(@D)/uart_interface \
+		$(TARGET_DIR)/usr/bin/uart_interface
+endef
+
+$(eval $(generic-package))
