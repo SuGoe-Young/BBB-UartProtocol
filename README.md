@@ -1,14 +1,12 @@
 # BBB-UartProtocol
 
 
-That drops a `uart_interface` binary in the repo. Copy it onto the board  and run it.
-
 ## Using it with Buildroot
 1. Throw the sources into your package folder, e.g.
    ```bash
    cp -r /path/to/BBB-UartProtocol/* /path/to/buildroot/package/uart_interface/
    ```
-2. Need the stock BBB config? Run this once (skip if you already did):
+2. BBB config:
    ```bash
    make beaglebone_defconfig
    ```
@@ -19,12 +17,12 @@ That drops a `uart_interface` binary in the repo. Copy it onto the board  and ru
        -> uart_interface --->
            -> [*] uart_interface
    ```
-4. Build like usual:
+4. Build:
    ```bash
    make
    ```
 
-## Tweaks I usually make
+## make
 1. Pick the UART in `main.c`:
    ```c
    fd = open("/dev/ttyS4", O_RDWR | O_NOCTTY | O_NDELAY);
@@ -46,4 +44,3 @@ VSEC:FOV:SET:9:45.2,33.6@
 VSEC:FOV:GET:0:@
 ```
 
-When a frame hits, the parser calls the matching handler, and whatever the handler writes gets pushed out through the callback I registered with `uart_response_init()`.
